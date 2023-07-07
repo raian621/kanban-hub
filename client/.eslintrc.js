@@ -3,7 +3,10 @@ module.exports = {
         "browser": true,
         "es2021": true
     },
-    "extends": "standard-with-typescript",
+    "extends": [
+        "standard-with-typescript",
+        "plugin:react/recommended"
+    ],
     "overrides": [
         {
             "env": {
@@ -21,6 +24,9 @@ module.exports = {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
+    "plugins": [
+        "react"
+    ],
     "rules": {
     }
 }
