@@ -3,7 +3,10 @@ module.exports = {
         "browser": true,
         "es2021": true
     },
-    "extends": "standard-with-typescript",
+    "extends": [
+        'eslint:recommended',
+        'plugin:@typescript-eslint/recommended',
+    ],
     "overrides": [
         {
             "env": {
@@ -21,6 +24,18 @@ module.exports = {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
-    "rules": {
+    'rules': {
+        'indent': [
+            'error',
+            2
+        ],
+        'linebreak-style': [
+            'error',
+            'unix'
+        ],
+        'semi': [
+            'error',
+            'always'
+        ]
     }
 }
