@@ -1,11 +1,9 @@
 import express, { Request, Response } from 'express';
 const app = express();
-const port = 5000;
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
+app.get('/api', (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify('Hello World'));
 });
 
-app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`);
-});
+export default app;
