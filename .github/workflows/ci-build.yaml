@@ -16,11 +16,13 @@ jobs:
         uses: actions/setup-node@master
         with:
           node-version: ${{ matrix.node-version }}
-
+        
       - name: install dependencies
+        working-directory: ./client
         run: npm install
 
       - name: build
+        working-directory: ./client
         run: |
           npm run build
           npm run test
@@ -33,8 +35,13 @@ jobs:
         uses: actions/setup-node@master
         with:
           node-version: ${{ matrix.node-version }}
-          
+        
+      - name: install dependencies
+        working-directory: ./client
+        run: npm install
+        
       - name: build
+        working-directory: ./server
         run: |
           npm run build
           npm run test
