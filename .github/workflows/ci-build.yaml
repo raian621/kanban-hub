@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  build-react-client:
+  test-react-client:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -24,13 +24,14 @@ jobs:
         # a workaround
         run: npm install --force
 
-      - name: build
-        working-directory: ./client
-        run: |
-          npm run build
-          npm run test
+        # I guess there's no need to build the react app for tests?
 
-  build-express-server:
+      - name: test
+        working-directory: ./client
+        run: npm run test
+
+
+  test-express-server:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -45,6 +46,8 @@ jobs:
 
       - name: build
         working-directory: ./server
-        run: |
-          npm run build
-          npm run test
+        run: npm run build
+
+      - name: test
+        working-directory: ./server
+        run: npm run test
