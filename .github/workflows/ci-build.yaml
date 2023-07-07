@@ -10,29 +10,29 @@ on:
 jobs:
   build-react-client:
     runs-on: ubuntu-latest
-  steps:
-    - used: actions/checkout@v2
-    - name: setup node
-      uses: actions/setup-node@master
-      with:
-        node-version: ${{ matrix.node-version }}
+    steps:
+      - used: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@master
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: install dependencies
-      run: npm install
+      - name: install dependencies
+        run: npm install
 
-    - name: build
-      run: |
-        npm run build
-        npm run test
+      - name: build
+        run: |
+          npm run build
+          npm run test
 
   build-express-server:
     runs-on: ubuntu-latest
-  steps:
-    - used: actions/checkout@v2
-    - name: setup node
-      uses: actions/setup-node@master
-      with:
-        node-version: ${{ matrix.node-version }}
-    run: |
-      npm run build
-      npm run test
+    steps:
+      - used: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@master
+        with:
+          node-version: ${{ matrix.node-version }}
+      run: |
+        npm run build
+        npm run test
