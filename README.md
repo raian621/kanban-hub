@@ -15,3 +15,20 @@ Since ZenHub decided to axe their free tier, I figured I could try to make a fre
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 ![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white)
 ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
+
+## Client
+
+
+
+## Server
+
+The KanbanHub server uses Express JS to handle API endpoints.
+
+### Environment variables
+
+Variable | Optional | Description
+--|--|--
+`HTTPS` | Yes | 
+`SSL_CRT_PATH` | Yes, if `HTTPS != true` |
+`SSL_KEY_PATH` | Yes, if `HTTPS != true` |
+`PORT` | Yes, defaults to `5000` |
