@@ -1,7 +1,7 @@
-import app from "./app"
+import { server, serverProtocol } from "./app";
 
 const port = 5000;
 
-app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`);
+server.listen(port, () => {
+  return console.log(`Express is listening at ${serverProtocol}://localhost:${port}`);
 });
