@@ -3,7 +3,8 @@ import http from 'http';
 import https from 'https';
 import { createServer } from '../src/app';
 
-describe('API online test', () => {
+
+describe('API routes test', () => {
   const OLD_ENV = process.env;
   let httpServer:http.Server;
   
