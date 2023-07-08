@@ -10,6 +10,11 @@ on:
 jobs:
   test-react-client:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x, 20.x]
+        
     steps:
       - uses: actions/checkout@v2
       - name: setup node
@@ -24,6 +29,10 @@ jobs:
         # a workaround
         run: npm install --force
 
+      - name: lint
+        working-directory: ./server
+        run: npm run lint
+
         # I guess there's no need to build the react app for tests?
 
       - name: test
@@ -33,6 +42,25 @@ jobs:
 
   test-express-server:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x, 20.x]
+
+    services:
+      postgres:
+        image: postgres:alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v2
       - name: setup node
@@ -47,6 +75,10 @@ jobs:
       - name: build
         working-directory: ./server
         run: npm run build
+
+      - name: lint
+        working-directory: ./server
+        run: npm run lint
 
       - name: test
         working-directory: ./server
