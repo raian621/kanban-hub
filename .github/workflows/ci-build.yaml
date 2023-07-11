@@ -73,7 +73,7 @@ jobs:
         working-directory: ./server
         run: npx prisma migrate dev --name init
         env:
-          DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/testb?schema=public"    
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/testb?schema=public"    
 
       - name: build
         working-directory: ./server
