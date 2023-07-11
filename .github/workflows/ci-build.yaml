@@ -57,7 +57,10 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
+    env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/testb?schema=public"    
+
     steps:
       - uses: actions/checkout@v2
       - name: setup node
@@ -72,9 +75,7 @@ jobs:
       - name: init prisma
         working-directory: ./server
         run: npx prisma migrate dev --name init
-        env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/testb?schema=public"    
-
+        
       - name: build
         working-directory: ./server
         run: npm run build
