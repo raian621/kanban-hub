@@ -12,11 +12,12 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  email     String   @db.VarChar(255)
-  passhash  String   @db.VarChar(255)
+  email     String   @db.VarChar(255) @unique
   createdAt DateTime @default(now())
+  username  String   @db.VarChar(127) @unique
   firstName String   @db.VarChar(127)
   lastName  String   @db.VarChar(127)
+  passhash  String   @db.VarChar(100)
   // ownedGroups     Group[]
   // ownedWorkspaces Workspace[]
   // assignedCards   Card[]
@@ -50,5 +51,5 @@ model User {
 // }
 
 // model Board {
-  
+
 // }
