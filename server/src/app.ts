@@ -73,12 +73,37 @@ app.post('/users', async (req: Request, res: Response, next: NextFunction) => {
     const user = await prisma.user.create({data: {
       firstName, lastName, email, username, passhash
     }});
-    res.status(201).end(JSON.stringify(user));
+    res.status(201).json({
+      username:  user.username,
+      firstName: user.firstName,
+      lastName:  user.lastName,
+      email:     user.email
+    });
   } catch(e) {
     // console.error((e as Error).message);
     res.status(204).end();
   }
   next();
+});
+
+app.get('/users/:username', async(req: Request, res: Response) => {
+  const username = req.params.username;
+  
+  try {
+    const user = await prisma.user.findFirstOrThrow({
+      where: { username: username }
+    });
+
+    return res.status(200).json({
+      username:  user.username,
+      firstName: user.firstName,
+      lastName:  user.lastName,
+      email:     user.email
+    });
+  } catch (e) {
+    console.error((e as Error).message);
+    return res.status(204).end();
+  }
 });
 
 export { server, serverProtocol, createServer };

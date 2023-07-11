@@ -161,6 +161,35 @@ describe('API routes test', () => {
 
     expect(res.statusCode).toEqual(400);
   });
+
+  test('Get existing User', async() => {
+    const user = (await createUsers(1))[0];
+    try {
+      const res = await request(httpServer)
+        .get(`/users/${user.username}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.firstName).toBe(user.firstName);
+      expect(res.body.lastName).toBe(user.lastName);
+      expect(res.body.email).toBe(user.email);
+      expect(res.body.username).toBe(user.username);
+      expect(res.body?.passhash).toBeUndefined();
+    } finally {
+      await prisma.user.delete({ where: { id: user.id }});
+    }
+  });
+
+  test('Get nonexistent User', async() => {
+    const res = await request(httpServer)
+      .get('/users/jeff');
+
+    expect(res.statusCode).toBe(204);
+    expect(res.body?.firstName).toBeUndefined();
+    expect(res.body?.lastName).toBeUndefined();
+    expect(res.body?.email).toBeUndefined();
+    expect(res.body?.username).toBeUndefined();
+    expect(res.body?.passhash).toBeUndefined();
+  });
 });
 
 describe('API HTTPS test', () => {
