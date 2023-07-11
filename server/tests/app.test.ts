@@ -22,7 +22,6 @@ type TestUser = {
 describe('API routes test', () => {
   const OLD_ENV = process.env;
   let httpServer:http.Server;
-  const prismaLog = []
   const prisma = new PrismaClient();
   // const prisma = new PrismaClient({
   //   log: [
@@ -170,7 +169,7 @@ describe('API HTTPS test', () => {
   
   beforeAll(() => {
     jest.resetModules(); // clears cache?
-  })
+  });
 
   beforeEach(() => {
     jest.resetModules(); // clears cache?
