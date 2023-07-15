@@ -16,6 +16,7 @@ describe('User `read` API routes', () => {
       ...OLD_ENV,
       HTTPS: 'false'
     };
+    console.log(process.env);
     httpServer = createServer(app, 'http') as http.Server;
   });
 
