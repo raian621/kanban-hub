@@ -20,9 +20,9 @@ describe('Login and logout routes', () => {
     httpServer = createServer(app, 'http') as http.Server;
   });
   
-  afterAll(() => {
+  afterAll(async() => {
     process.env = OLD_ENV;
-    prisma.$disconnect();
+    await prisma.$disconnect();
   });
 
   test('Login a User', async() => {
