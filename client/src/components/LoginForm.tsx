@@ -2,7 +2,7 @@ import React, { FormEvent, useContext, useRef } from 'react';
 import { UserContext, UserData } from '../UserContext';
 
 const LoginForm = () => {
-  const [ userData, setUserData ] = useContext(UserContext) as [UserData, React.Dispatch<React.SetStateAction<UserData>>];
+  const setUserData = (useContext(UserContext) as [UserData, React.Dispatch<React.SetStateAction<UserData>>])[1];
 
   const username = useRef('');
   const password = useRef('');
@@ -24,9 +24,12 @@ const LoginForm = () => {
           'Content-Type': 'application/json'
         }
       });
-      const userJSON = await result.json();
-      console.log(userJSON);
-      setUserData({ ...userJSON });
+
+      if (result.ok) {
+        const userJSON = await result.json();
+        console.log(userJSON);
+        setUserData({ ...userJSON });
+      }
     } catch (e) {
       console.error((e as Error).message);
     }

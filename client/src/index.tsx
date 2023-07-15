@@ -19,9 +19,12 @@ function withUserDataRefContext({ children } : { children: React.ReactNode }): J
         'Content-Type': 'application/json'
       }
     });
-    const userJSON = await res.json();
-    console.log('userJSON = ', userJSON);
-    return userJSON;
+    if (res.status === 200) {
+      const userJSON = await res.json();
+      return userJSON;
+    } else {
+      return {};
+    }
   }
 
   // on initial render, check for the session id cookie, then

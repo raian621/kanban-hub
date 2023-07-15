@@ -36,7 +36,7 @@ const userRoutes = express.Router();
  * a valid email, etc.
  */
 userRoutes.post('/', async (req: Request, res: Response, next: NextFunction) => {
-  console.log(`[POST /users]: Request to create user with data ${req.body}`);
+  console.log(`[POST /users]: Request to create user \`${req.body?.username}\``);
   res.setHeader('Content-Type', 'application/json');
   
   const firstName = req.body?.firstName;
@@ -53,6 +53,7 @@ userRoutes.post('/', async (req: Request, res: Response, next: NextFunction) => 
     username === undefined ||
     password === undefined
   ) {
+    console.log(`[POST /users]: Request to create user \`${username}\` failed due to missing field`);
     res.status(400).end();
     next();
     return;
@@ -74,7 +75,7 @@ userRoutes.post('/', async (req: Request, res: Response, next: NextFunction) => 
       email:     user.email
     });
   } catch(e) {
-    // console.error((e as Error).message);
+    console.error((e as Error).message);
     res.status(204).end();
   }
   next();
@@ -137,9 +138,13 @@ userRoutes.post('/login', async(req: Request, res: Response, next: NextFunction)
   const password = req.body?.password;
   
   if (username && password) {
-    console.log(`[POST /users/login] Request to log in as user ${username}`);
+    console.log(`[POST /users/login] Request to log in as user \`${username}\``);
 
     const user = await prisma.user.findFirst({ where: { username: req.body.username }});
+    if (user === null) {
+      console.log(`[POST /users/login] User \`${username}\` does not exist`);
+      return res.status(404).end();
+    }
     if (await argonVerify((user as User).passhash, password)) {
       req.session.data = {
         userId: user?.id,
@@ -147,16 +152,47 @@ userRoutes.post('/login', async(req: Request, res: Response, next: NextFunction)
         authenticated: true,
         sessionId: req.session.id
       };
-      console.log('Login successful!');
+
+      console.log(`[POST /users/login] User \`${username}\` login successful`);
+      res.json(req.session.data);
     } else {
-      console.log('Login successful!');
-      return res.status(400).send('Login unsuccessful...');
+      console.log(`[POST /users/login] User \`${username}\` login failed due to incorrect password`);
+      return res.status(400);
     }
-    res.json(req.session.data);
   } else {
+    console.log(`[POST /users/login] User \`${username}\` login failed due to incorrect username and/or password`);
     return res.status(400).end();
   }
   next();
+});
+
+/**
+ * ROUTE: POST /users/logout
+ * ----------------------------
+ * Used to "log out" a user by destroying their session
+ * 
+ * - In order to log a user out of the service, they must provide
+ * their sessionId as a cookie `connect.sid`
+ */
+userRoutes.post('/logout', async(req: Request, res: Response, next: NextFunction) => {
+  if (!req.session.data?.authenticated) {
+    res.status(404).end();
+    next();
+    return;
+  } else {
+    req.session.data.authenticated = false;
+  }
+
+  req.sessionStore.destroy(req.session.id, err => {
+    if (err)
+      console.log(err.message);
+  });
+  req.session.destroy(err => {
+    if (err)
+      console.log(err.message);
+  });
+
+  return res.status(200).end();
 });
 
 /**
@@ -173,8 +209,14 @@ userRoutes.post('/login', async(req: Request, res: Response, next: NextFunction)
  */
 userRoutes.get('/', async(req: Request, res: Response, next: NextFunction) => {
   console.log(`[GET /users] Request for session information from ${req.session.data?.username}`);
-  res.json(req.session.data);
-  next();
+  if (req.session.data?.authenticated) {
+    res.status(200).json(req.session.data);
+    next();
+    return;
+  } else {
+    console.log('[GET /users] Invalid or expired session, sending request to client to delete invalid session cookie...');
+    return res.status(204).clearCookie('connect.sid').end();
+  }
 });
 
 export default userRoutes;

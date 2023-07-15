@@ -69,6 +69,7 @@ app.all('/', (req: Request, res: Response, next: NextFunction) => {
  */
 app.all('/api', (req: Request, res: Response, next: NextFunction) => {
   res.redirect('/');
+  next();
 });
 
 /**
@@ -81,6 +82,7 @@ app.all('/api', (req: Request, res: Response, next: NextFunction) => {
  */
 app.all('/api/*', (req: Request, res: Response, next: NextFunction) => {
   res.redirect(req.url.replace(/^\/api\//, '/'));
+  next();
 });
 
 export { server, serverProtocol, createServer, app, prisma };
