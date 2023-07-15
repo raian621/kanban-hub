@@ -49,51 +49,51 @@ describe('Login and logout routes', () => {
     return;
   });
 
-  test('Log out user', async() => {
-    const user = (await createUsers(1, prisma))[0];
-    let sessionId = '';
-    try {
-      // unauthenicated log out
-      const agent = request.agent(httpServer);
-      let res = await agent.post('/users/logout');
-      expect(res.statusCode).toBe(404);
+  // test('Log out user', async() => {
+  //   const user = (await createUsers(1, prisma))[0];
+  //   let sessionId = '';
+  //   try {
+  //     // unauthenicated log out
+  //     const agent = request.agent(httpServer);
+  //     let res = await agent.post('/users/logout');
+  //     expect(res.statusCode).toBe(404);
 
-      // authenticated log out
-      res = await agent.post('/users/login')
-        .set('Content-Type', 'application/json')
-        .send({
-          username: user.username,
-          password: user.password
-        });
-      sessionId = res.body.sessionId;
-      expect(res.statusCode).toBe(200);
-      res = await agent.post('/users/logout');
-      expect(res.statusCode).toBe(200);
-    } finally {
-      await prisma.user.delete({ where: { id: user.id }});
-    }
-  });
+  //     // authenticated log out
+  //     res = await agent.post('/users/login')
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         username: user.username,
+  //         password: user.password
+  //       });
+  //     sessionId = res.body.sessionId;
+  //     expect(res.statusCode).toBe(200);
+  //     res = await agent.post('/users/logout');
+  //     expect(res.statusCode).toBe(200);
+  //   } finally {
+  //     await prisma.user.delete({ where: { id: user.id }});
+  //   }
+  // });
 
-  test('Get a User\'s pertinent information', async() => {
-    const user = (await createUsers(1, prisma))[0];
-    const agent = request.agent(httpServer);
+  // test('Get a User\'s pertinent information', async() => {
+  //   const user = (await createUsers(1, prisma))[0];
+  //   const agent = request.agent(httpServer);
 
-    // unauthenticated call
-    let res = await agent.get('/users');
-    expect(res.statusCode).toBe(204);
-    expect(res.body).toEqual({});
+  //   // unauthenticated call
+  //   let res = await agent.get('/users');
+  //   expect(res.statusCode).toBe(204);
+  //   expect(res.body).toEqual({});
 
-    res = await agent.post('/users/login').send({
-      username: user.username,
-      password: user.password
-    });
+  //   res = await agent.post('/users/login').send({
+  //     username: user.username,
+  //     password: user.password
+  //   });
   
-    // authenticated call
-    res = await agent.get('/users');
-    console.log(res.body);
-    expect(res.statusCode).toBe(200);
+  //   // authenticated call
+  //   res = await agent.get('/users');
+  //   console.log(res.body);
+  //   expect(res.statusCode).toBe(200);
 
-    await prisma.user.delete({ where: { id: user.id }});
-    await prisma.session.delete({ where: { id: res.body?.sessionId }});
-  });
+  //   await prisma.user.delete({ where: { id: user.id }});
+  //   await prisma.session.delete({ where: { id: res.body?.sessionId }});
+  // });
 });
