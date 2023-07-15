@@ -1,0 +1,85 @@
+.login {
+  background-color: rgb(124, 158, 252);
+  display: flex;
+  min-width: 100vw;
+  max-width: auto;
+  min-height: 100vh;
+  max-height: auto;
+  padding: 0;
+  margin: 0;
+}
+
+.login-and-registration {
+  margin: auto;
+  margin-top: 15vh;
+  background-color: white;
+  padding: 50px;
+  max-width: 100%;
+  width: 500px;
+  transition: width ease-in 400ms, margin ease-in 200ms;
+}
+
+@media all and (max-width: 800px){
+  .login-and-registration {
+    margin: 15vh 30px auto 30px;
+    padding: 30px;
+    width: 100%;
+  }
+}
+
+.login-form fieldset {
+  display: flex;
+  border: none;
+  flex-direction: column;
+  padding: 0;
+  margin: 10px 0 10px 0;
+  gap: 2px;
+}
+
+.top-form-button {
+  --padding: 10px;
+  --bar-thickness: 3px;
+  border: none;
+  padding: var(--padding);
+  width: 50%;
+}
+
+.top-form-button.inactive {
+  background-color: #c5d8e4;
+  cursor: pointer;
+}
+
+.top-form-button:hover{
+  background-color: #e5eef3;
+}
+
+.top-form-button.active {
+  background-color: white;
+  padding-top: calc(var(--padding) - var(--bar-thickness));
+  border-top: solid #08a0ff var(--bar-thickness);
+}
+
+.login-and-registration h1 {
+  font-weight: normal;
+}
+
+.login-form input {
+  border: solid #9e9e9e 1px;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.login-form input[type="submit"]{
+  --bg-color: #007dca;
+  --dark-bg-color: #005081;
+  background-color: var(--bg-color);
+  width: 100%;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+
+.login-form input[type="submit"]:hover{
+  background-color: var(--dark-bg-color);
+  cursor: pointer;
+}

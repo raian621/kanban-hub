@@ -32,4 +32,4 @@ Variable | Optional | Description
 `SSL_CRT_PATH` | Yes, if `HTTPS != true` |
 `SSL_KEY_PATH` | Yes, if `HTTPS != true` |
 `PORT` | Yes, defaults to `5000` |
-`DATABASE_URL | No |
+`DATABASE_URL` | No |

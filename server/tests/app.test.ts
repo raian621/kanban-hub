@@ -1,8 +1,8 @@
 import request from 'supertest';
 import http from 'http';
 import https from 'https';
-import { createServer } from '../src/app';
 import { PrismaClient } from '@prisma/client';
+import { app, createServer } from '../src/app';
 
 describe('API routes test', () => {
   const OLD_ENV = process.env;
@@ -28,7 +28,7 @@ describe('API routes test', () => {
       ...OLD_ENV,
       HTTPS: 'false'
     };
-    httpServer = createServer() as http.Server;
+    httpServer = createServer(app, 'http') as http.Server;
   });
   
   afterAll(() => {
@@ -59,7 +59,7 @@ describe('API HTTPS test', () => {
       SSL_CRT_PATH: 'certs/selfsigned.crt',
       SSL_KEY_PATH: 'certs/selfsigned.key'
     };
-    httpsServer = createServer() as https.Server;
+    httpsServer = createServer(app, 'https') as https.Server;
   });
   
   afterAll(() => {

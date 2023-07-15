@@ -2,9 +2,9 @@ import { createUsers } from "./mockUsers";
 import http from 'http';
 import { PrismaClient } from "@prisma/client";
 import request from 'supertest';
-import { createServer } from "../src/app";
+import { app, createServer } from "../src/app";
 
-describe('User read API routes', () => {
+describe('User `read` API routes', () => {
   const OLD_ENV = process.env;
   let httpServer:http.Server;
   const prisma = new PrismaClient();
@@ -16,7 +16,7 @@ describe('User read API routes', () => {
       ...OLD_ENV,
       HTTPS: 'false'
     };
-    httpServer = createServer() as http.Server;
+    httpServer = createServer(app, 'http') as http.Server;
   });
 
   afterAll(() => {

@@ -1,109 +1,86 @@
 import express, { NextFunction, Request, Response } from 'express';
+import session from 'express-session';
+import cors from 'cors';
 import helmet from 'helmet';
-import { readFileSync } from 'fs';
-import https from 'https';
-import http from 'http';
 import dotenv from 'dotenv';
-import { prisma } from './prismaClient';
-import { 
-  hash as argonHash, 
-  verify as argonVerfiy 
-} from 'argon2';
+import createServer from './createServer';
+import userRoutes from './userRoutes';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
 
+const prisma = new PrismaClient();
 const app = express();
 app.use(helmet());
+app.use(cors({
+  origin: 'https://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.disable('x-powered-by');
 
-let serverProtocol:string;
+const sessionStore = new PrismaSessionStore(prisma, {
+  checkPeriod: 1000,
+  dbRecordIdIsSessionId: true,
+  dbRecordIdFunction: undefined,
+});
 
-function createServer():https.Server|http.Server {
-  let server:https.Server|http.Server;
-  if (process.env.HTTPS === 'true') {
-    const key = readFileSync(process.env.SSL_KEY_PATH as string);
-    const cert = readFileSync(process.env.SSL_CRT_PATH as string);
-    const options = {
-      key: key,
-      cert: cert
-    };
-    server = https.createServer(options, app);
-    serverProtocol = 'https';
-  } else {
-    server = http.createServer({}, app);
-    serverProtocol = 'http';
+app.use(session({
+  secret: process.env.SESSION_SECRET as string,
+  resave: true,
+  saveUninitialized: false,
+  rolling: true,
+  store: sessionStore,
+  cookie: {
+    path: '/',
+    httpOnly: false,
+    maxAge: 1000 * 60 * 60 * 24 * 5,
+    secure: 'auto',
+    sameSite: true
   }
-  return server;
-}
-const server = createServer();
+}));
 
-app.get('/', (req: Request, res: Response, next: NextFunction) => {
+app.use('/users', userRoutes);
+// app.use('/workspaces', workspaceRoutes);
+// app.use('/boards', boardRoutes);
+
+const serverProtocol = process.env.HTTPS === 'true' ? 'https' : 'http';
+const server = createServer(app, serverProtocol);
+
+/**
+ * ROUTE: [ANY] /
+ * -------------------------
+ * Base route for API
+ * 
+ * - Just used to check if the API is online
+ */
+app.all('/', (req: Request, res: Response, next: NextFunction) => {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify('The API is live!'));
   next();
 });
 
-app.post('/users', async (req: Request, res: Response, next: NextFunction) => {
-  res.setHeader('Content-Type', 'application/json');
-
-  const firstName = req.body?.firstName;
-  const lastName =  req.body?.lastName;
-  const email =     req.body?.email;
-  const username =  req.body?.username;
-  const password =  req.body?.password;
-  
-  // if any of the required data is missing, return a 400 status
-  if (
-    firstName === undefined ||
-    lastName === undefined ||
-    email === undefined ||
-    username === undefined ||
-    password === undefined
-  ) {
-    res.status(400).end();
-    next();
-    return;
-  }
-
-  console.log(password);
-  const passhash = await argonHash(password);
-
-  try {
-    const user = await prisma.user.create({data: {
-      firstName, lastName, email, username, passhash
-    }});
-    res.status(201).json({
-      username:  user.username,
-      firstName: user.firstName,
-      lastName:  user.lastName,
-      email:     user.email
-    });
-  } catch(e) {
-    // console.error((e as Error).message);
-    res.status(204).end();
-  }
-  next();
+/**
+ * ROUTE: [ANY] /api
+ * ----------------------------
+ * Proxy for the API; /api -> /
+ */
+app.all('/api', (req: Request, res: Response, next: NextFunction) => {
+  res.redirect('/');
 });
 
-app.get('/users/:username', async(req: Request, res: Response) => {
-  const username = req.params.username;
-  
-  try {
-    const user = await prisma.user.findFirstOrThrow({
-      where: { username: username }
-    });
-
-    return res.status(200).json({
-      username:  user.username,
-      firstName: user.firstName,
-      lastName:  user.lastName,
-      email:     user.email
-    });
-  } catch (e) {
-    console.error((e as Error).message);
-    return res.status(204).end();
-  }
+/**
+ * ROUTE: [ANY] /api/*
+ * ----------------------------
+ * Proxy for the API; /api/% -> /%
+ * 
+ * - Any following route in this file should be able to be prefixed with
+ * `/api` and be proxied toward the proper route.
+ */
+app.all('/api/*', (req: Request, res: Response, next: NextFunction) => {
+  res.redirect(req.url.replace(/^\/api\//, '/'));
 });
 
-export { server, serverProtocol, createServer };
+export { server, serverProtocol, createServer, app, prisma };

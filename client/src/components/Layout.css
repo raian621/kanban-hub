@@ -1,0 +1,26 @@
+.layout-wrapper {
+  --top-bar-height: 50px;
+  --top-bar-padding: 10px;
+  --top-bar-full-height: calc(var(--top-bar-height) - 2 * var(--top-bar-padding))
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  height: calc(100vh - var(--top-bar-height) - 2 * var(--top-bar-padding));
+  padding: var(--top-bar-padding);
+  background-color: #dddddd;
+}
+
+.topbar {
+  display: flex;
+  width: calc(100vw - 2 * var(--top-bar-padding));
+  height: var(--top-bar-full-height);
+  padding: var(--top-bar-padding);
+  background-color: #eeeeee;
+}
+
+.horizontal-wrapper {
+  display: flex;
+}

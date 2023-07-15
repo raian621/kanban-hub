@@ -1,11 +1,10 @@
-import { createServer } from '../src/app';
-import { PrismaClient, User } from '@prisma/client';
-import { hash as argonHash } from 'argon2';
+import { createServer, app } from '../src/app';
+import { PrismaClient } from '@prisma/client';
 import http from 'http';
 import request from 'supertest';
 import { createFakeUserData, createUsers } from './mockUsers';
 
-describe('API routes test', () => {
+describe('User `create` API routes', () => {
   const OLD_ENV = process.env;
   let httpServer:http.Server;
   const prisma = new PrismaClient();
@@ -17,18 +16,12 @@ describe('API routes test', () => {
       ...OLD_ENV,
       HTTPS: 'false'
     };
-    httpServer = createServer() as http.Server;
+    httpServer = createServer(app, 'http') as http.Server;
   });
   
   afterAll(() => {
     process.env = OLD_ENV;
     prisma.$disconnect();
-  });
-
-  test('API should be online', async () => {
-    const res = await request(httpServer).get('/');
-    expect(res.body).toEqual('The API is live!');
-    expect(res.statusCode).toEqual(200);
   });
 
   test('Create new User', async () => {
@@ -44,9 +37,6 @@ describe('API routes test', () => {
     expect(res.body?.lastName).toEqual(userData.lastName);
     expect(res.body?.email).toEqual(userData.email);
     expect(res.body?.username).toEqual(userData.username);
-
-    console.log("user object returned by server:");
-    console.log(res.body);
 
     // remove test user
     if (res.body?.id) {
