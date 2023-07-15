@@ -154,10 +154,10 @@ userRoutes.post('/login', async(req: Request, res: Response, next: NextFunction)
       };
 
       console.log(`[POST /users/login] User \`${username}\` login successful`);
-      res.json(req.session.data);
+      return res.json(req.session.data);
     } else {
       console.log(`[POST /users/login] User \`${username}\` login failed due to incorrect password`);
-      return res.status(400);
+      return res.status(400).end();
     }
   } else {
     console.log(`[POST /users/login] User \`${username}\` login failed due to incorrect username and/or password`);

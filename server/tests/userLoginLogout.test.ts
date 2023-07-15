@@ -46,6 +46,7 @@ describe('Login and logout routes', () => {
 
     await prisma.user.delete({ where: { id: user.id }});
     await prisma.session.delete({ where: { id: res.body?.sessionId }});
+    return;
   });
 
   test('Log out user', async() => {
