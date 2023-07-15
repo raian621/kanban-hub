@@ -40,6 +40,24 @@ describe('User `read` API routes', () => {
       await prisma.user.delete({ where: { id: user.id }});
     }
   });
+
+  test('Get existing User (API proxy test /api/* -> /*)', async() => {
+    const user = (await createUsers(1, prisma))[0];
+    try {
+      const res = await request(httpServer)
+        .get(`/api/users/${user.username}`)
+        .redirects(1);
+  
+      expect(res.statusCode).toBe(200);
+      expect(res.body.firstName).toBe(user.firstName);
+      expect(res.body.lastName).toBe(user.lastName);
+      expect(res.body.email).toBe(user.email);
+      expect(res.body.username).toBe(user.username);
+      expect(res.body?.passhash).toBeUndefined();
+    } finally {
+      await prisma.user.delete({ where: { id: user.id }});
+    }
+  });
   
   test('Get nonexistent User', async() => {
     const res = await request(httpServer)

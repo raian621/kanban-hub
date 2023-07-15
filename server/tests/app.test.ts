@@ -38,8 +38,14 @@ describe('API routes test', () => {
 
   test('API should be online', async () => {
     const res = await request(httpServer).get('/');
-    expect(res.body).toEqual('The API is live!');
     expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual('The API is live!');
+  });
+
+  test ('Requests to /api route should be proxied to / route', async() => {
+    const res = await request(httpServer).get('/api').redirects(1);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual('The API is live!');
   });
 });
 

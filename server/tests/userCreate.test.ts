@@ -38,14 +38,11 @@ describe('User `create` API routes', () => {
     expect(res.body?.email).toEqual(userData.email);
     expect(res.body?.username).toEqual(userData.username);
 
+    console.log(res.body);
+
     // remove test user
-    if (res.body?.id) {
-      await prisma.user.delete({
-        where: {
-          id: res.body.id
-        }
-      });
-    }
+    if (res.body?.userId)
+      await prisma.user.delete({ where: { id: res.body.userId }});
   });
 
   test('Attempt to create existing User', async() => {

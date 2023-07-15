@@ -3,7 +3,6 @@ import https from 'https';
 import http from 'http';
 import { Express } from 'express';
 
-
 export default function createServer(app:Express, serverProtocol:string):https.Server|http.Server|null {
   let server:https.Server|http.Server|null = null;
   if (serverProtocol === 'https') {

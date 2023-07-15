@@ -4,6 +4,8 @@ import { User } from '@prisma/client';
 import { prisma } from './app';
 
 type UserSessionData = {
+  sessionId?: string,
+  userId?: number,
   username?: string,
   authenticated?: boolean
 }
@@ -63,7 +65,9 @@ userRoutes.post('/', async (req: Request, res: Response, next: NextFunction) => 
     const user = await prisma.user.create({data: {
       firstName, lastName, email, username, passhash
     }});
+
     res.status(201).json({
+      userId:    user.id,
       username:  user.username,
       firstName: user.firstName,
       lastName:  user.lastName,
@@ -129,7 +133,6 @@ userRoutes.get('/:username', async(req: Request, res: Response) => {
  *    }
  */
 userRoutes.post('/login', async(req: Request, res: Response, next: NextFunction) => {
-  console.log(req.body);
   const username = req.body?.username;
   const password = req.body?.password;
   
@@ -139,16 +142,19 @@ userRoutes.post('/login', async(req: Request, res: Response, next: NextFunction)
     const user = await prisma.user.findFirst({ where: { username: req.body.username }});
     if (await argonVerify((user as User).passhash, password)) {
       req.session.data = {
+        userId: user?.id,
         username: username,
-        authenticated: true
+        authenticated: true,
+        sessionId: req.session.id
       };
       console.log('Login successful!');
-    } else
-      return res.status(400).send('Login unsuccessful');
-
-    res.json({ username, authenticated: true });
+    } else {
+      console.log('Login successful!');
+      return res.status(400).send('Login unsuccessful...');
+    }
+    res.json(req.session.data);
   } else {
-    return res.end(400);
+    return res.status(400).end();
   }
   next();
 });
