@@ -1,29 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { BrowserRouter } from 'react-router-dom';
+import React, { useContext, useEffect, useRef } from 'react';
+import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Login } from './Login';
+import { UserContext, UserData } from './UserContext';
+import Dashboard from './Dashboard';
 
 function App(): JSX.Element {
-  return (
-    <BrowserRouter>
+  const [ userData, setUserData ] = useContext(UserContext) as [UserData, React.Dispatch<React.SetStateAction<UserData>>];
 
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    </BrowserRouter>
+  return (
+    <Routes>
+      <Route path='/'>
+        <Route index element={<Login/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/dashboard' element={<Dashboard/>}/>
+      </Route>
+    </Routes>
   );
 }
 

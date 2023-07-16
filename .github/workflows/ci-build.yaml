@@ -29,7 +29,7 @@ jobs:
         # a ~~workaround~~ band-aid
         run: npm install --force
 
-        # I guess there's no need to build the react app for tests?
+        # I guess there's no need to build the react app for tests? yeppers
 
       - name: test
         working-directory: ./client
@@ -59,7 +59,8 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/testb?schema=public"    
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/testb?schema=public"
+      SESSION_SECRET: secret123
 
     steps:
       - uses: actions/checkout@v2
@@ -76,9 +77,10 @@ jobs:
         working-directory: ./server
         run: npx prisma migrate dev --name init
         
-      - name: build
-        working-directory: ./server
-        run: npm run build
+      # no need to build for now, we are not ready to release :3
+      # - name: build
+      #   working-directory: ./server
+      #   run: npm run build
 
       - name: lint
         working-directory: ./server

@@ -23,6 +23,13 @@ model User {
   // assignedCards   Card[]
 }
 
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
 // model Group {
 //   id Int @id @default(autoincrement())
 //   createdAt DateTime @default(now())
