@@ -1,14 +1,13 @@
 import { createUsers } from "./mockUsers";
 import http from 'http';
-import { PrismaClient } from "@prisma/client";
 import request from 'supertest';
-import { app, createServer } from "../src/app";
+import createServer, { ServerKit } from "../src/createServer";
+import cleanUpServer from "./cleanUpServer";
 
 describe('User `read` API routes', () => {
   const OLD_ENV = process.env;
-  let httpServer:http.Server;
-  const prisma = new PrismaClient();
-  
+  let serverKit:ServerKit;
+
   beforeEach(() => {
     // ensure we use HTTP for these tests
     jest.resetModules(); // clears cache?
@@ -16,18 +15,22 @@ describe('User `read` API routes', () => {
       ...OLD_ENV,
       HTTPS: 'false'
     };
-    httpServer = createServer(app, 'http') as http.Server;
+    serverKit = createServer('http');
   });
+  
+  afterEach(async() => {
+    await cleanUpServer(serverKit);
+  })
 
-  afterAll(async() => {
+  afterAll(() => {
     process.env = OLD_ENV;
-    await prisma.$disconnect();
   });
 
   test('Get existing User', async() => {
+    const { server, prisma } = serverKit;
     const user = (await createUsers(1, prisma))[0];
     try {
-      const res = await request(httpServer)
+      const res = await request(server)
         .get(`/users/${user.username}`);
   
       expect(res.statusCode).toBe(200);
@@ -42,9 +45,10 @@ describe('User `read` API routes', () => {
   });
 
   test('Get existing User (API proxy test /api/* -> /*)', async() => {
+    const { server, prisma } = serverKit;
     const user = (await createUsers(1, prisma))[0];
     try {
-      const res = await request(httpServer)
+      const res = await request(server)
         .get(`/api/users/${user.username}`)
         .redirects(1);
   
@@ -60,7 +64,8 @@ describe('User `read` API routes', () => {
   });
   
   test('Get nonexistent User', async() => {
-    const res = await request(httpServer)
+    const { server } = serverKit;
+    const res = await request(server)
       .get('/users/jeff');
   
     expect(res.statusCode).toBe(204);

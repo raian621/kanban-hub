@@ -1,57 +1,48 @@
 import request from 'supertest';
 import http from 'http';
 import https from 'https';
-import { PrismaClient } from '@prisma/client';
-import { app, createServer } from '../src/app';
+import createServer, { ServerKit } from '../src/createServer';
+import { Express } from 'express';
+import cleanUpServer from './cleanUpServer';
 
 describe('API routes test', () => {
   const OLD_ENV = process.env;
-  let httpServer:http.Server;
-  const prisma = new PrismaClient();
-  // const prisma = new PrismaClient({
-  //   log: [
-  //     {
-  //       emit: "event",
-  //       level: "query",
-  //     },
-  //   ],
-  // });
-  
-  // prisma.$on("query", async (e) => {
-  //   console.log(`${e.query} ${e.params}`);
-  // });
+  let serverKit:ServerKit;
 
   beforeEach(() => {
     // ensure we use HTTP for these tests
     jest.resetModules(); // clears cache?
-    process.env = { 
-      ...OLD_ENV,
-      HTTPS: 'false'
-    };
-    httpServer = createServer(app, 'http') as http.Server;
+    serverKit = createServer('http');
   });
   
+  afterEach(async() => {
+    await cleanUpServer(serverKit);
+  })
+
   afterAll(() => {
     process.env = OLD_ENV;
-    prisma.$disconnect();
   });
 
   test('API should be online', async () => {
-    const res = await request(httpServer).get('/');
+    const { server } = serverKit;
+    const res = await request(server).get('/');
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual('The API is live!');
+    return;
   });
 
   test ('Requests to /api route should be proxied to / route', async() => {
-    const res = await request(httpServer).get('/api').redirects(1);
+    const { server } = serverKit;
+    const res = await request(server).get('/api').redirects(1);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual('The API is live!');
+    return;
   });
 });
 
 describe('API HTTPS test', () => {
   const OLD_ENV = process.env;
-  let httpsServer:https.Server;
+  let serverKit:ServerKit;
   
   beforeAll(() => {
     jest.resetModules(); // clears cache?
@@ -65,15 +56,17 @@ describe('API HTTPS test', () => {
       SSL_CRT_PATH: 'certs/selfsigned.crt',
       SSL_KEY_PATH: 'certs/selfsigned.key'
     };
-    httpsServer = createServer(app, 'https') as https.Server;
+    serverKit = createServer('https');
   });
   
-  afterAll(() => {
+  afterAll(async() => {
     process.env = OLD_ENV;
+    await cleanUpServer(serverKit);
   });
 
   test('API should be able to use HTTPS', async() => {
-    const res = await request(httpsServer).get('/').trustLocalhost();
+    const { server } = serverKit;
+    const res = await request(server).get('/').trustLocalhost();
     expect(res.statusCode).toEqual(200);
   });
 });

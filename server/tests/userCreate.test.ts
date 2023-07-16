@@ -1,13 +1,11 @@
-import { createServer, app } from '../src/app';
-import { PrismaClient } from '@prisma/client';
-import http from 'http';
 import request from 'supertest';
 import { createFakeUserData, createUsers } from './mockUsers';
+import createServer, { ServerKit } from '../src/createServer';
+import cleanUpServer from './cleanUpServer';
 
 describe('User `create` API routes', () => {
   const OLD_ENV = process.env;
-  let httpServer:http.Server;
-  const prisma = new PrismaClient();
+  let serverKit:ServerKit;
 
   beforeEach(() => {
     // ensure we use HTTP for these tests
@@ -16,18 +14,23 @@ describe('User `create` API routes', () => {
       ...OLD_ENV,
       HTTPS: 'false'
     };
-    httpServer = createServer(app, 'http') as http.Server;
+    serverKit = createServer('http');
   });
   
+  afterEach(async() => {
+    await cleanUpServer(serverKit);
+  })
+
   afterAll(async() => {
     process.env = OLD_ENV;
-    await prisma.$disconnect();
   });
 
+
   test('Create new User', async () => {
+    const { server, prisma } = serverKit;
     const userData = createFakeUserData();
 
-    const res = await request(httpServer)
+    const res = await request(server)
       .post('/users')
       .set('Content-Type', 'application/json')
       .send({ ...userData });
@@ -38,26 +41,27 @@ describe('User `create` API routes', () => {
     expect(res.body?.email).toEqual(userData.email);
     expect(res.body?.username).toEqual(userData.username);
 
-    console.log(res.body);
-
     // remove test user
     if (res.body?.userId)
       await prisma.user.delete({ where: { id: res.body.userId }});
   });
 
+
   test('Attempt to create existing User', async() => {
+    const { server, prisma } = serverKit;
     const user = (await createUsers(1, prisma))[0];
 
-    const res = await request(httpServer)
+    const res = await request(server)
       .post('/users')
       .set('Content-Type', 'application/json')
       .send({ 
         firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        username: user.username,
-        password: user.password
+        lastName:  user.lastName,
+        email:     user.email,
+        username:  user.username,
+        password:  user.password
       });
+
     try {
       expect(res.statusCode).toEqual(204);
       expect(res.body?.firstName).toBeUndefined();
@@ -76,9 +80,11 @@ describe('User `create` API routes', () => {
     }
   });
 
+
   test('Missing data for User creation', async() => {
+    const { server } = serverKit;
     // only provide a name
-    const res = await request(httpServer)
+    const res = await request(server)
       .post('/users')
       .set('Content-Type', 'application/json')
       .send({ 
