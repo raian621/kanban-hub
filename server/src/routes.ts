@@ -1,9 +1,8 @@
-import { PrismaSessionStore } from "@quixo3/prisma-session-store";
-import { PrismaClient } from "@prisma/client";
 import { Express, NextFunction, Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 import useUserRoutes from "./userRoutes";
 
-export default function useRoutes(app:Express, prisma:PrismaClient, prismaSessionStore:PrismaSessionStore) {
+export default function useRoutes(app:Express, prisma:PrismaClient) {
   useUserRoutes(app, prisma);
 
   /**

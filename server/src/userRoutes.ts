@@ -1,7 +1,6 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import { hash as argonHash, verify as argonVerify } from 'argon2';
 import { PrismaClient, User } from '@prisma/client';
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 
 type UserSessionData = {
   sessionId?: string,

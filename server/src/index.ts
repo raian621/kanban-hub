@@ -1,5 +1,4 @@
 import createServer from "./createServer";
-import initUserRoutes from "./userRoutes";
 
 const port = 5000;
 

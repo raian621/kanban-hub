@@ -1,8 +1,5 @@
 import request from 'supertest';
-import http from 'http';
-import https from 'https';
 import createServer, { ServerKit } from '../src/createServer';
-import { Express } from 'express';
 import cleanUpServer from './cleanUpServer';
 
 describe('API routes test', () => {
@@ -17,7 +14,7 @@ describe('API routes test', () => {
   
   afterEach(async() => {
     await cleanUpServer(serverKit);
-  })
+  });
 
   afterAll(() => {
     process.env = OLD_ENV;

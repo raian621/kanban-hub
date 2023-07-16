@@ -19,7 +19,7 @@ describe('User `create` API routes', () => {
   
   afterEach(async() => {
     await cleanUpServer(serverKit);
-  })
+  });
 
   afterAll(async() => {
     process.env = OLD_ENV;

@@ -20,7 +20,7 @@ describe('Login and logout routes', () => {
   
   afterEach(async() => {
     await cleanUpServer(serverKit);
-  })
+  });
 
   afterAll(() => {
     process.env = OLD_ENV;
@@ -54,7 +54,7 @@ describe('Login and logout routes', () => {
   test('Log out user', async() => {
     const { server, prisma } = serverKit;
     const user = (await createUsers(1, prisma))[0];
-    let sessionId = '';
+    
     try {
       // unauthenicated log out
       const agent = request.agent(server);
@@ -68,7 +68,7 @@ describe('Login and logout routes', () => {
           username: user.username,
           password: user.password
         });
-      sessionId = res.body.sessionId;
+
       expect(res.statusCode).toBe(200);
       res = await agent.post('/users/logout');
       expect(res.statusCode).toBe(200);

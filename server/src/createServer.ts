@@ -63,7 +63,7 @@ export default function createServer(serverProtocol:string): ServerKit {
   app.use(express.urlencoded({ extended: true }));
   app.disable('x-powered-by');
 
-  useRoutes(app, prisma, prismaSessionStore);
+  useRoutes(app, prisma);
 
   return { 
     app, 

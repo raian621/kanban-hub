@@ -1,5 +1,4 @@
 import { createUsers } from "./mockUsers";
-import http from 'http';
 import request from 'supertest';
 import createServer, { ServerKit } from "../src/createServer";
 import cleanUpServer from "./cleanUpServer";
@@ -20,7 +19,7 @@ describe('User `read` API routes', () => {
   
   afterEach(async() => {
     await cleanUpServer(serverKit);
-  })
+  });
 
   afterAll(() => {
     process.env = OLD_ENV;
