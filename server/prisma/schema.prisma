@@ -10,19 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @db.VarChar(255) @unique
-  createdAt DateTime @default(now())
-  username  String   @db.VarChar(127) @unique
-  firstName String   @db.VarChar(127)
-  lastName  String   @db.VarChar(127)
-  passhash  String   @db.VarChar(100)
-  // ownedGroups     Group[]
-  // ownedWorkspaces Workspace[]
-  // assignedCards   Card[]
-}
-
 model Session {
   id        String   @id
   sid       String   @unique
@@ -30,33 +17,59 @@ model Session {
   expiresAt DateTime
 }
 
-// model Group {
-//   id Int @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   name String @db.VarChar(255)
-//   description String @db.Text
-//   owner User @relation(fields: [ownerId], references: [id])
-//   ownerId Int @unique
-// }
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @db.VarChar(255) @unique
+  createdAt     DateTime @default(now())
+  username      String   @db.VarChar(127) @unique
+  firstName     String   @db.VarChar(127)
+  lastName      String   @db.VarChar(127)
+  passhash      String   @db.VarChar(100)
+  groups        UserInGroup[]
+  organizations UserInOrganization[]
+}
 
-// model Workspace {
-//   id Int @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   name String @db.VarChar(255)
-//   description String @db.Text
-//   owner User @relation(fields: [ownerId], references: [id])
-//   ownerId Int @unique
-// }
+model Group {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  name          String   @db.VarChar(255)
+  description   String   @db.Text
+  users         UserInGroup[]
+  organizations GroupInOrganization[]
+}
 
-// model Card {
-//   id Int @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   name String @db.VarChar(255)
-//   description String @db.Text
-//   assignedTo User @relation(fields: [assignedToId], references: [id])
-//   assignedToId Int @unique
-// }
+model Organization {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  name        String   @db.VarChar(255)
+  description String   @db.Text
+  users       UserInOrganization[]
+  groups      GroupInOrganization[]
+}
 
-// model Board {
+model UserInGroup {
+  user    User  @relation(fields: [userId], references: [id]) 
+  group   Group @relation(fields: [groupId], references: [id]) 
+  userId  Int
+  groupId Int
 
-// }
+  @@id([userId, groupId])
+}
+
+model UserInOrganization {
+  user           User         @relation(fields: [userId], references: [id]) 
+  organization   Organization @relation(fields: [organizationId], references: [id]) 
+  userId         Int
+  organizationId Int
+
+  @@id([userId, organizationId])
+}
+
+model GroupInOrganization {
+  group          Group        @relation(fields: [groupId], references: [id]) 
+  organization   Organization @relation(fields: [organizationId], references: [id]) 
+  groupId        Int
+  organizationId Int
+
+  @@id([groupId, organizationId])
+}
