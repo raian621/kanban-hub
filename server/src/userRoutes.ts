@@ -219,5 +219,23 @@ export default function useUserRoutes(app:Express, prisma:PrismaClient) {
     }
   });
 
+  /**
+   * ROUTE: DELETE /users
+   * ----------------------------
+   * Used to delete a user's account. The user must be logged into their
+   * account in order to delete it.
+   */
+  userRoutes.delete('/', async(req: Request, res: Response, next: NextFunction) => {
+    console.log(`[DELETE /users] Request to delete user ${req.session.data?.username}`);
+    if (req.session.data?.userId) {
+      await prisma.user.delete({ where: { id: req.session.data?.userId }});
+      res.status(200).clearCookie('connect.sid').send();
+      req.session.destroy((err) => { if (err) console.log(err); });
+    } else {
+      res.sendStatus(401);
+    }
+    next();
+  })
+
   app.use('/users', userRoutes);
 }
