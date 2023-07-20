@@ -18,47 +18,49 @@ model Session {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @db.VarChar(255) @unique
-  createdAt     DateTime @default(now())
-  username      String   @db.VarChar(127) @unique
-  firstName     String   @db.VarChar(127)
-  lastName      String   @db.VarChar(127)
-  passhash      String   @db.VarChar(100)
+  id            Int                  @id @default(autoincrement())
+  email         String               @unique @db.VarChar(255)
+  createdAt     DateTime             @default(now())
+  username      String               @unique @db.VarChar(127)
+  firstName     String               @db.VarChar(127)
+  lastName      String               @db.VarChar(127)
+  passhash      String               @db.VarChar(100)
   groups        UserInGroup[]
   organizations UserInOrganization[]
 }
 
 model Group {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  name          String   @db.VarChar(255)
-  description   String   @db.Text
+  id            Int                   @id @default(autoincrement())
+  createdAt     DateTime              @default(now())
+  name          String                @db.VarChar(255)
+  description   String                @db.Text
   users         UserInGroup[]
   organizations GroupInOrganization[]
 }
 
 model Organization {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  name        String   @db.VarChar(255)
-  description String   @db.Text
+  id          Int                   @id @default(autoincrement())
+  createdAt   DateTime              @default(now())
+  name        String                @db.VarChar(255)
+  description String                @db.Text
   users       UserInOrganization[]
   groups      GroupInOrganization[]
 }
 
 model UserInGroup {
-  user    User  @relation(fields: [userId], references: [id]) 
-  group   Group @relation(fields: [groupId], references: [id]) 
-  userId  Int
-  groupId Int
+  user      User     @relation(fields: [userId], references: [id])
+  group     Group    @relation(fields: [groupId], references: [id])
+  createdAt DateTime @default(now())
+  userId    Int
+  groupId   Int
 
   @@id([userId, groupId])
 }
 
 model UserInOrganization {
-  user           User         @relation(fields: [userId], references: [id]) 
-  organization   Organization @relation(fields: [organizationId], references: [id]) 
+  user           User         @relation(fields: [userId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
   userId         Int
   organizationId Int
 
@@ -66,10 +68,41 @@ model UserInOrganization {
 }
 
 model GroupInOrganization {
-  group          Group        @relation(fields: [groupId], references: [id]) 
-  organization   Organization @relation(fields: [organizationId], references: [id]) 
+  group          Group        @relation(fields: [groupId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
   groupId        Int
   organizationId Int
 
   @@id([groupId, organizationId])
+}
+
+model Card {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  title       String
+  description String   @db.Text
+  pipeline    Pipeline @relation(fields: [pipelineId], references: [id])
+  pipelineId  Int
+  board       Board    @relation(fields: [boardId], references: [id])
+  boardId     Int
+}
+
+model Pipeline {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  title       String
+  description String   @db.Text
+  board       Board    @relation(fields: [boardId], references: [id])
+  boardId     Int
+  cards       Card[]
+}
+
+model Board {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  title       String
+  description String     @db.Text
+  cards       Card[]
+  pipelines   Pipeline[]
 }
