@@ -27,6 +27,15 @@ model User {
   passhash      String               @db.VarChar(100)
   groups        UserInGroup[]
   organizations UserInOrganization[]
+  boards        UserInBoard[]
+  workspaces    UserInWorkspace[]
+
+  ownedGroups        Group[]
+  ownedOrganizations Organization[]
+  ownedCards         Card[]
+  ownedPipelines     Pipeline[]
+  ownedBoards        Board[]
+  ownedWorkspaces    Workspace[]
 }
 
 model Group {
@@ -36,6 +45,14 @@ model Group {
   description   String                @db.Text
   users         UserInGroup[]
   organizations GroupInOrganization[]
+
+  userOwner         User         @relation(fields: [userOwnerId], references: [id])
+  userOwnerId       Int
+  organizationOwner Organization @relation(fields: [organizationId], references: [id])
+  organizationId    Int
+
+  ownedBoards     Board[]
+  ownedWorkspaces Workspace[]
 }
 
 model Organization {
@@ -45,6 +62,14 @@ model Organization {
   description String                @db.Text
   users       UserInOrganization[]
   groups      GroupInOrganization[]
+
+  userOwner   User @relation(fields: [userOwnerId], references: [id])
+  userOwnerId Int
+
+  ownedGroups Group[]
+
+  ownedBoards     Board[]
+  ownedWorkspaces Workspace[]
 }
 
 model UserInGroup {
@@ -86,6 +111,9 @@ model Card {
   pipelineId  Int
   board       Board    @relation(fields: [boardId], references: [id])
   boardId     Int
+
+  userOwner   User? @relation(fields: [userOwnerId], references: [id])
+  userOwnerId Int?
 }
 
 model Pipeline {
@@ -96,13 +124,77 @@ model Pipeline {
   board       Board    @relation(fields: [boardId], references: [id])
   boardId     Int
   cards       Card[]
+
+  userOwner   User? @relation(fields: [userOwnerId], references: [id])
+  userOwnerId Int?
 }
 
 model Board {
-  id          Int        @id @default(autoincrement())
-  createdAt   DateTime   @default(now())
+  id          Int                @id @default(autoincrement())
+  createdAt   DateTime           @default(now())
   title       String
-  description String     @db.Text
+  description String             @db.Text
   cards       Card[]
   pipelines   Pipeline[]
+  workspaces  BoardInWorkspace[]
+  users       UserInBoard[]
+
+  userOwner    User?         @relation(fields: [userOwnerId], references: [id])
+  userOwnerId  Int?
+  groupOwner   Group?        @relation(fields: [groupOwnerId], references: [id])
+  groupOwnerId Int?
+  orgOwner     Organization? @relation(fields: [orgOwnerId], references: [id])
+  orgOwnerId   Int?
+}
+
+model Workspace {
+  id          Int                @id @default(autoincrement())
+  createdAt   DateTime           @default(now())
+  title       String
+  description String             @db.Text
+  boards      BoardInWorkspace[]
+  users       UserInWorkspace[]
+
+  userOwner    User?         @relation(fields: [userOwnerId], references: [id])
+  userOwnerId  Int?
+  groupOwner   Group?        @relation(fields: [groupOwnerId], references: [id])
+  groupOwnerId Int?
+  orgOwner     Organization? @relation(fields: [orgOwnerId], references: [id])
+  orgOwnerId   Int?
+}
+
+model UserInBoard {
+  createdAt   DateTime @default(now())
+  title       String
+  description String   @db.Text
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  board       Board    @relation(fields: [boardId], references: [id])
+  boardId     Int
+
+  @@id([userId, boardId])
+}
+
+model UserInWorkspace {
+  createdAt   DateTime  @default(now())
+  title       String
+  description String    @db.Text
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId Int
+
+  @@id([userId, workspaceId])
+}
+
+model BoardInWorkspace {
+  createdAt   DateTime  @default(now())
+  title       String
+  description String    @db.Text
+  board       Board     @relation(fields: [boardId], references: [id])
+  boardId     Int
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId Int
+
+  @@id([boardId, workspaceId])
 }
