@@ -235,7 +235,7 @@ export default function useUserRoutes(app:Express, prisma:PrismaClient) {
       res.sendStatus(401);
     }
     next();
-  })
+  });
 
   app.use('/users', userRoutes);
 }
