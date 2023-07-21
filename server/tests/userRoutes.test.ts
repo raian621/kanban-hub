@@ -312,7 +312,7 @@ describe('Given the user exists', () => {
       const res = await request(server).delete('/users');
       expect(res.statusCode).toBe(401);
     } finally {
-      await prisma.user.delete({ where: { id: user.id }})
+      await prisma.user.delete({ where: { id: user.id }});
     }
   });
 
@@ -336,7 +336,7 @@ describe('Given the user exists', () => {
     } finally {
       // if user wasn't deleted, make sure to delete it to clean up
       if (!deleteSuccess)
-        await prisma.user.delete({ where: { id: user.id }})
+        await prisma.user.delete({ where: { id: user.id }});
     }
   });
 });
