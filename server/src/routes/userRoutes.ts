@@ -1,7 +1,7 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import { verify as argonVerify } from 'argon2';
 import { PrismaClient, User } from '@prisma/client';
-import { CleanUser, createUser, readUser } from './userCRUD';
+import { CleanUser, createUser, readUser } from '../crud/user';
 
 type UserSessionData = {
   sessionId?: string,
@@ -198,8 +198,8 @@ export default function useUserRoutes(app:Express, prisma:PrismaClient) {
     console.log(`[DELETE /users] Request to delete user ${req.session.data?.username}`);
     if (req.session.data?.userId) {
       await prisma.user.delete({ where: { id: req.session.data?.userId }});
-      res.status(200).clearCookie('connect.sid').send();
       req.session.destroy((err) => { if (err) console.log(err); });
+      res.status(200).clearCookie('connect.sid').send();
     } else {
       res.sendStatus(401);
     }
