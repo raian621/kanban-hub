@@ -1,6 +1,7 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
-import { hash as argonHash, verify as argonVerify } from 'argon2';
+import { verify as argonVerify } from 'argon2';
 import { PrismaClient, User } from '@prisma/client';
+import { CleanUser, createUser, readUser } from './userCRUD';
 
 type UserSessionData = {
   sessionId?: string,
@@ -37,36 +38,17 @@ export default function useUserRoutes(app:Express, prisma:PrismaClient) {
    */
   userRoutes.post('/', async (req: Request, res: Response, next: NextFunction) => {
     console.log(`[POST /users]: Request to create user \`${req.body?.username}\``);
-    res.setHeader('Content-Type', 'application/json');
-    
-    const firstName = req.body?.firstName;
-    const lastName =  req.body?.lastName;
-    const email =     req.body?.email;
-    const username =  req.body?.username;
-    const password =  req.body?.password;
-    
+
+    const userReturnStatus = await createUser(prisma, req.body);
+    console.log(userReturnStatus);
     // if any of the required data is missing, return a 400 status
-    if (
-      firstName === undefined ||
-      lastName === undefined ||
-      email === undefined ||
-      username === undefined ||
-      password === undefined
-    ) {
-      console.log(`[POST /users]: Request to create user \`${username}\` failed due to missing field`);
-      res.status(400).send();
+    if (userReturnStatus.user === undefined) {
+      if (userReturnStatus.error)       res.sendStatus(400);
+      else if (userReturnStatus.exists) res.sendStatus(204);
       next();
       return;
-    }
-  
-    console.log(password);
-    const passhash = await argonHash(password);
-  
-    try {
-      const user = await prisma.user.create({data: {
-        firstName, lastName, email, username, passhash
-      }});
-  
+    } else {
+      const user = userReturnStatus.user as User;
       res.status(201).json({
         userId:    user.id,
         username:  user.username,
@@ -74,11 +56,9 @@ export default function useUserRoutes(app:Express, prisma:PrismaClient) {
         lastName:  user.lastName,
         email:     user.email
       });
-    } catch(e) {
-      console.error((e as Error).message);
-      res.status(204).send();
     }
     next();
+    return;
   });
   
   /**
@@ -100,23 +80,12 @@ export default function useUserRoutes(app:Express, prisma:PrismaClient) {
    * hashing schemes but I'm not taking any chances
    */
   userRoutes.get('/:username', async(req: Request, res: Response) => {
-    const username = req.params.username;
-    console.log(`[GET /users/${username}]: Request for user '${username}' public info`);
-    
-    try {
-      const user = await prisma.user.findFirstOrThrow({
-        where: { username: username }
-      });
-  
-      return res.status(200).json({
-        username:  user.username,
-        firstName: user.firstName,
-        lastName:  user.lastName,
-        email:     user.email
-      });
-    } catch (e) {
-      console.error((e as Error).message);
-      return res.status(204).send();
+    const user = await readUser(prisma, req.params);
+    if (user === null) {
+      return res.sendStatus(204);
+    } else {
+      const { id, username, firstName, lastName, email} = user as CleanUser;
+      return res.status(200).json({ id, username, firstName, lastName, email });
     }
   });
   
