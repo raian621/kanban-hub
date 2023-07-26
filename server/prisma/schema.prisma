@@ -30,12 +30,12 @@ model User {
   boards        UserInBoard[]
   workspaces    UserInWorkspace[]
 
-  ownedGroups        Group[]
-  ownedOrganizations Organization[]
-  ownedCards         Card[]
-  ownedPipelines     Pipeline[]
-  ownedBoards        Board[]
-  ownedWorkspaces    Workspace[]
+  ownedGroups        Group[]        @relation("OwnedGroups")
+  ownedOrganizations Organization[] @relation("OwnedOrganizations")
+  ownedCards         Card[]         @relation("OwnedCards")
+  ownedPipelines     Pipeline[]     @relation("OwnedPipelines")
+  ownedBoards        Board[]        @relation("OwnedBoards")
+  ownedWorkspaces    Workspace[]    @relation("OwnedWorkspaces")
 }
 
 model Group {
@@ -46,13 +46,13 @@ model Group {
   users         UserInGroup[]
   organizations GroupInOrganization[]
 
-  userOwner         User         @relation(fields: [userOwnerId], references: [id])
+  userOwner         User         @relation("OwnedGroups", fields: [userOwnerId], references: [id])
   userOwnerId       Int
   organizationOwner Organization @relation(fields: [organizationId], references: [id])
   organizationId    Int
 
-  ownedBoards     Board[]
-  ownedWorkspaces Workspace[]
+  ownedBoards     Board[] @relation("OwnedBoards")
+  ownedWorkspaces Workspace[] @relation("OwnedWorkspaces")
 }
 
 model Organization {
@@ -63,13 +63,13 @@ model Organization {
   users       UserInOrganization[]
   groups      GroupInOrganization[]
 
-  userOwner   User @relation(fields: [userOwnerId], references: [id])
+  userOwner   User @relation("OwnedOrganizations", fields: [userOwnerId], references: [id])
   userOwnerId Int
 
   ownedGroups Group[]
 
-  ownedBoards     Board[]
-  ownedWorkspaces Workspace[]
+  ownedBoards     Board[] @relation("OwnedBoards")
+  ownedWorkspaces Workspace[] @relation("OwnedWorkspaces")
 }
 
 model UserInGroup {
@@ -112,7 +112,7 @@ model Card {
   board       Board    @relation(fields: [boardId], references: [id])
   boardId     Int
 
-  userOwner   User? @relation(fields: [userOwnerId], references: [id])
+  userOwner   User? @relation("OwnedCards", fields: [userOwnerId], references: [id])
   userOwnerId Int?
 }
 
@@ -125,7 +125,7 @@ model Pipeline {
   boardId     Int
   cards       Card[]
 
-  userOwner   User? @relation(fields: [userOwnerId], references: [id])
+  userOwner   User? @relation("OwnedPipelines", fields: [userOwnerId], references: [id])
   userOwnerId Int?
 }
 
@@ -139,11 +139,11 @@ model Board {
   workspaces  BoardInWorkspace[]
   users       UserInBoard[]
 
-  userOwner    User?         @relation(fields: [userOwnerId], references: [id])
+  userOwner    User?         @relation("OwnedBoards", fields: [userOwnerId], references: [id])
   userOwnerId  Int?
-  groupOwner   Group?        @relation(fields: [groupOwnerId], references: [id])
+  groupOwner   Group?        @relation("OwnedBoards", fields: [groupOwnerId], references: [id])
   groupOwnerId Int?
-  orgOwner     Organization? @relation(fields: [orgOwnerId], references: [id])
+  orgOwner     Organization? @relation("OwnedBoards", fields: [orgOwnerId], references: [id])
   orgOwnerId   Int?
 }
 
@@ -155,11 +155,11 @@ model Workspace {
   boards      BoardInWorkspace[]
   users       UserInWorkspace[]
 
-  userOwner    User?         @relation(fields: [userOwnerId], references: [id])
+  userOwner    User?         @relation("OwnedWorkspaces", fields: [userOwnerId], references: [id])
   userOwnerId  Int?
-  groupOwner   Group?        @relation(fields: [groupOwnerId], references: [id])
+  groupOwner   Group?        @relation("OwnedWorkspaces", fields: [groupOwnerId], references: [id])
   groupOwnerId Int?
-  orgOwner     Organization? @relation(fields: [orgOwnerId], references: [id])
+  orgOwner     Organization? @relation("OwnedWorkspaces", fields: [orgOwnerId], references: [id])
   orgOwnerId   Int?
 }
 

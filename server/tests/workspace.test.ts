@@ -46,7 +46,7 @@ describe('Workspace CRUD functions', () => {
       ownerType: 'User',
       title: 'Title',
       description: 'Lorem ipsum'
-    }
+    };
 
     const createWorkspaceResult = await createWorkspace(prisma, workspaceData);
     const { workspace } = createWorkspaceResult;
@@ -57,7 +57,8 @@ describe('Workspace CRUD functions', () => {
 
       const workspaceSearchParams:WorkspaceParams = {
         id: workspace?.id
-      }
+      };
+
       const workspaceReadResult = await readWorkspace(prisma, workspaceSearchParams);
       const workspaceRead = workspaceReadResult.workspace as Workspace;
 
@@ -80,7 +81,7 @@ describe('Workspace CRUD functions', () => {
       ownerType: 'User',
       title: 'Title',
       description: 'Lorem ipsum'
-    }
+    };
 
     const createWorkspaceResult = await createWorkspace(prisma, workspaceData);
     let { workspace } = createWorkspaceResult;
@@ -92,7 +93,7 @@ describe('Workspace CRUD functions', () => {
       workspaceData.title = 'Title2';
       workspaceData.description = 'Lorem ipsum dos';
 
-      const updateWorkspaceResult = await updateWorkspace(prisma, workspaceData);
+      const updateWorkspaceResult = await updateWorkspace(prisma, workspaceData, (workspace as Workspace).id);
       expect(updateWorkspaceResult.workspace).toBeDefined();
       workspace = updateWorkspaceResult.workspace as Workspace;
       expect(updateWorkspaceResult.exists).toBe(false);
@@ -111,10 +112,11 @@ describe('Workspace CRUD functions', () => {
       ownerType: 'User',
       title: 'Title',
       description: 'Lorem ipsum'
-    }
+    };
 
     const createWorkspaceResult = await createWorkspace(prisma, workspaceData);
     const { workspace } = createWorkspaceResult;
+    let workspaceCount = 0;
     try {
       expect(createWorkspaceResult.exists).toBe(false);
       expect(createWorkspaceResult.error).toBe(false);
@@ -122,14 +124,14 @@ describe('Workspace CRUD functions', () => {
 
       const result = await deleteWorkspace(prisma, (workspace as Workspace).id);     
       expect(result).toBe(true);
-      const workspaceCount = prisma.workspace.count({ where: {
+      workspaceCount = await prisma.workspace.count({ where: {
         id: (workspace as Workspace).id
       }});
       expect(workspaceCount).toBe(0);
     } finally {
-      if (workspace)
-        await prisma.workspace.delete({ where: { id: workspace.id }});
+      if (workspaceCount > 0)
+        await prisma.workspace.delete({ where: { id: (workspace as Workspace).id }});
       await prisma.user.delete({ where: { id: user.id }});
     }
-  })
+  });
 });

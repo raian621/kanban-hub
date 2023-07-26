@@ -1,4 +1,4 @@
-import { Group, Organization, PrismaClient, User, Board } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { SessionData } from "express-session";
 
 export type BoardData = {
