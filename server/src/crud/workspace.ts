@@ -40,7 +40,7 @@ export async function createWorkspace(prisma:PrismaClient, data:WorkspaceData) :
     case 'Group': 
       owner = await prisma.group.findFirst({ where: { id: ownerId }});
       break;
-    case 'Organization': 
+    case 'Organization':
       owner = await prisma.organization.findFirst({ where: { id: ownerId }});
       break;
   }
