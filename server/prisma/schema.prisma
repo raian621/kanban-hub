@@ -1,12 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  // NOTE: do not delete the ":3" comment, it's used to differentiate 
+  // this "provider =" from the one in the generator client block :3
+  provider = "postgresql" // :3
   url      = env("DATABASE_URL")
 }
 
@@ -18,86 +17,80 @@ model Session {
 }
 
 model User {
-  id            Int                  @id @default(autoincrement())
-  email         String               @unique @db.VarChar(255)
-  createdAt     DateTime             @default(now())
-  username      String               @unique @db.VarChar(127)
-  firstName     String               @db.VarChar(127)
-  lastName      String               @db.VarChar(127)
-  passhash      String               @db.VarChar(100)
-  groups        UserInGroup[]
-  organizations UserInOrganization[]
-  boards        UserInBoard[]
-  workspaces    UserInWorkspace[]
-
-  ownedGroups        Group[]        @relation("OwnedGroups")
-  ownedOrganizations Organization[] @relation("OwnedOrganizations")
-  ownedCards         Card[]         @relation("OwnedCards")
-  ownedPipelines     Pipeline[]     @relation("OwnedPipelines")
-  ownedBoards        Board[]        @relation("OwnedBoards")
-  ownedWorkspaces    Workspace[]    @relation("OwnedWorkspaces")
+  id                 Int                  @id @default(autoincrement())
+  email              String               @unique @db.VarChar(255)
+  createdAt          DateTime             @default(now())
+  firstName          String               @db.VarChar(127)
+  lastName           String               @db.VarChar(127)
+  username           String               @unique @db.VarChar(127)
+  passhash           String               @db.VarChar(100)
+  ownedBoards        Board[]              @relation("OwnedBoards")
+  ownedCards         Card[]               @relation("OwnedCards")
+  ownedGroups        Group[]              @relation("OwnedGroups")
+  ownedOrganizations Organization[]       @relation("OwnedOrganizations")
+  ownedPipelines     Pipeline[]           @relation("OwnedPipelines")
+  boards             UserInBoard[]
+  groups             UserInGroup[]
+  organizations      UserInOrganization[]
+  workspaces         UserInWorkspace[]
+  ownedWorkspaces    Workspace[]          @relation("OwnedWorkspaces")
 }
 
 model Group {
-  id            Int                   @id @default(autoincrement())
-  createdAt     DateTime              @default(now())
-  name          String                @db.VarChar(255)
-  description   String                @db.Text
-  users         UserInGroup[]
-  organizations GroupInOrganization[]
-
-  userOwner         User         @relation("OwnedGroups", fields: [userOwnerId], references: [id])
-  userOwnerId       Int
-  organizationOwner Organization @relation(fields: [organizationId], references: [id])
-  organizationId    Int
-
-  ownedBoards     Board[] @relation("OwnedBoards")
-  ownedWorkspaces Workspace[] @relation("OwnedWorkspaces")
+  id                  Int                   @id @default(autoincrement())
+  createdAt           DateTime              @default(now())
+  name                String                @db.VarChar(255)
+  description         String
+  organizationOwnerId Int?
+  userOwnerId         Int?
+  organizationOwner   Organization?         @relation(fields: [organizationOwnerId], references: [id])
+  userOwner           User?                 @relation("OwnedGroups", fields: [userOwnerId], references: [id])
+  organizations       GroupInOrganization[]
+  users               UserInGroup[]
+  ownedBoards         Board[]               @relation("OwnedBoards")
+  ownedWorkspaces     Workspace[]           @relation("OwnedWorkspaces")
 }
 
 model Organization {
-  id          Int                   @id @default(autoincrement())
-  createdAt   DateTime              @default(now())
-  name        String                @db.VarChar(255)
-  description String                @db.Text
-  users       UserInOrganization[]
-  groups      GroupInOrganization[]
-
-  userOwner   User @relation("OwnedOrganizations", fields: [userOwnerId], references: [id])
-  userOwnerId Int
-
-  ownedGroups Group[]
-
-  ownedBoards     Board[] @relation("OwnedBoards")
-  ownedWorkspaces Workspace[] @relation("OwnedWorkspaces")
+  id              Int                   @id @default(autoincrement())
+  createdAt       DateTime              @default(now())
+  name            String                @db.VarChar(255)
+  description     String
+  userOwnerId     Int
+  ownedBoards     Board[]               @relation("OwnedBoards")
+  ownedGroups     Group[]
+  groups          GroupInOrganization[]
+  userOwner       User                  @relation("OwnedOrganizations", fields: [userOwnerId], references: [id])
+  users           UserInOrganization[]
+  ownedWorkspaces Workspace[]           @relation("OwnedWorkspaces")
 }
 
 model UserInGroup {
-  user      User     @relation(fields: [userId], references: [id])
-  group     Group    @relation(fields: [groupId], references: [id])
-  createdAt DateTime @default(now())
   userId    Int
   groupId   Int
+  createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@id([userId, groupId])
 }
 
 model UserInOrganization {
-  user           User         @relation(fields: [userId], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime     @default(now())
   userId         Int
   organizationId Int
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
   @@id([userId, organizationId])
 }
 
 model GroupInOrganization {
-  group          Group        @relation(fields: [groupId], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime     @default(now())
   groupId        Int
   organizationId Int
+  createdAt      DateTime     @default(now())
+  group          Group        @relation(fields: [groupId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   @@id([groupId, organizationId])
 }
@@ -106,71 +99,67 @@ model Card {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
   title       String
-  description String   @db.Text
-  pipeline    Pipeline @relation(fields: [pipelineId], references: [id])
+  description String
   pipelineId  Int
-  board       Board    @relation(fields: [boardId], references: [id])
   boardId     Int
-
-  userOwner   User? @relation("OwnedCards", fields: [userOwnerId], references: [id])
   userOwnerId Int?
+  board       Board    @relation(fields: [boardId], references: [id])
+  pipeline    Pipeline @relation(fields: [pipelineId], references: [id])
+  userOwner   User?    @relation("OwnedCards", fields: [userOwnerId], references: [id])
 }
 
 model Pipeline {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
   title       String
-  description String   @db.Text
-  board       Board    @relation(fields: [boardId], references: [id])
+  description String
   boardId     Int
-  cards       Card[]
-
-  userOwner   User? @relation("OwnedPipelines", fields: [userOwnerId], references: [id])
   userOwnerId Int?
+  cards       Card[]
+  board       Board    @relation(fields: [boardId], references: [id])
+  userOwner   User?    @relation("OwnedPipelines", fields: [userOwnerId], references: [id])
 }
 
 model Board {
-  id          Int                @id @default(autoincrement())
-  createdAt   DateTime           @default(now())
-  title       String
-  description String             @db.Text
-  cards       Card[]
-  pipelines   Pipeline[]
-  workspaces  BoardInWorkspace[]
-  users       UserInBoard[]
-
-  userOwner    User?         @relation("OwnedBoards", fields: [userOwnerId], references: [id])
+  id           Int                @id @default(autoincrement())
+  createdAt    DateTime           @default(now())
+  title        String
+  description  String
   userOwnerId  Int?
-  groupOwner   Group?        @relation("OwnedBoards", fields: [groupOwnerId], references: [id])
   groupOwnerId Int?
-  orgOwner     Organization? @relation("OwnedBoards", fields: [orgOwnerId], references: [id])
   orgOwnerId   Int?
+  groupOwner   Group?             @relation("OwnedBoards", fields: [groupOwnerId], references: [id])
+  orgOwner     Organization?      @relation("OwnedBoards", fields: [orgOwnerId], references: [id])
+  userOwner    User?              @relation("OwnedBoards", fields: [userOwnerId], references: [id])
+  workspaces   BoardInWorkspace[]
+  cards        Card[]
+  pipelines    Pipeline[]
+  users        UserInBoard[]
 }
 
 model Workspace {
-  id          Int                @id @default(autoincrement())
-  createdAt   DateTime           @default(now())
-  title       String
-  description String             @db.Text
-  boards      BoardInWorkspace[]
-  users       UserInWorkspace[]
-
-  userOwner    User?         @relation("OwnedWorkspaces", fields: [userOwnerId], references: [id])
+  id           Int                @id @default(autoincrement())
+  createdAt    DateTime           @default(now())
+  title        String
+  description  String
   userOwnerId  Int?
-  groupOwner   Group?        @relation("OwnedWorkspaces", fields: [groupOwnerId], references: [id])
   groupOwnerId Int?
-  orgOwner     Organization? @relation("OwnedWorkspaces", fields: [orgOwnerId], references: [id])
   orgOwnerId   Int?
+  boards       BoardInWorkspace[]
+  users        UserInWorkspace[]
+  groupOwner   Group?             @relation("OwnedWorkspaces", fields: [groupOwnerId], references: [id])
+  orgOwner     Organization?      @relation("OwnedWorkspaces", fields: [orgOwnerId], references: [id])
+  userOwner    User?              @relation("OwnedWorkspaces", fields: [userOwnerId], references: [id])
 }
 
 model UserInBoard {
   createdAt   DateTime @default(now())
   title       String
-  description String   @db.Text
-  user        User     @relation(fields: [userId], references: [id])
+  description String
   userId      Int
-  board       Board    @relation(fields: [boardId], references: [id])
   boardId     Int
+  board       Board    @relation(fields: [boardId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
 
   @@id([userId, boardId])
 }
@@ -178,11 +167,11 @@ model UserInBoard {
 model UserInWorkspace {
   createdAt   DateTime  @default(now())
   title       String
-  description String    @db.Text
-  user        User      @relation(fields: [userId], references: [id])
+  description String
   userId      Int
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId Int
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   @@id([userId, workspaceId])
 }
@@ -190,11 +179,11 @@ model UserInWorkspace {
 model BoardInWorkspace {
   createdAt   DateTime  @default(now())
   title       String
-  description String    @db.Text
-  board       Board     @relation(fields: [boardId], references: [id])
+  description String
   boardId     Int
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId Int
+  board       Board     @relation(fields: [boardId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   @@id([boardId, workspaceId])
 }

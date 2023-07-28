@@ -34,15 +34,15 @@ export async function createWorkspace(prisma:PrismaClient, data:WorkspaceData) :
   let owner:User|Group|Organization|null = null;
 
   switch(ownerType) {
-    case 'User': 
-      owner = await prisma.user.findFirst({ where: { id: ownerId }});
-      break;
-    case 'Group': 
-      owner = await prisma.group.findFirst({ where: { id: ownerId }});
-      break;
-    case 'Organization':
-      owner = await prisma.organization.findFirst({ where: { id: ownerId }});
-      break;
+  case 'User': 
+    owner = await prisma.user.findFirst({ where: { id: ownerId }});
+    break;
+  case 'Group': 
+    owner = await prisma.group.findFirst({ where: { id: ownerId }});
+    break;
+  case 'Organization':
+    owner = await prisma.organization.findFirst({ where: { id: ownerId }});
+    break;
   }
 
   if (owner === undefined) {
@@ -87,14 +87,14 @@ export async function readWorkspace(prisma:PrismaClient, params:WorkspaceParams)
     if (workspace)
       readWorkspaceResult.workspace = workspace;
   } else {
-      const workspace = await prisma.workspace.findFirst({
-        where: {
-          title: title,
-          id: id,
-        }
-      });
-      if (workspace)
-        readWorkspaceResult.workspace = workspace;
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        title: title,
+        id: id,
+      }
+    });
+    if (workspace)
+      readWorkspaceResult.workspace = workspace;
   }
   
   return readWorkspaceResult;
@@ -115,7 +115,7 @@ export async function updateWorkspace(prisma:PrismaClient, data:WorkspaceData, w
       groupOwnerId: ownerType === 'Group' ? ownerId : undefined,
       userOwnerId: ownerType === 'User' ? ownerId : undefined,
     }
-  })
+  });
   if (workspace === null)
     return workspaceQueryResult;
   workspaceQueryResult.workspace = workspace;
